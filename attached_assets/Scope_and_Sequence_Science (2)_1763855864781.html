@@ -1,0 +1,701 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Science Life Skills Scope and Sequence</title>
+    <!-- Inter font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS via CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
+        }
+        .table-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .table-cell {
+            padding: 1rem;
+            min-height: 80px;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            text-align: left;
+        }
+        .table-cell:hover {
+            background-color: #146CFD;
+            color: #ffffff;
+        }
+        .table-cell:hover .unit-title, .table-cell:hover .unit-outcomes, .table-cell:hover .unit-description {
+            color: #ffffff;
+        }
+        .rotated-text {
+            writing-mode: vertical-lr;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            white-space: nowrap;
+        }
+        /* Custom styles for the dropdown to match the overall aesthetic */
+        .select-container {
+            padding: 1rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .select-button, .print-button {
+            background-color: #146CFD;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            margin: 0 8px;
+            border: none;
+        }
+        .select-button.active {
+            background-color: #002664;
+            box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+        }
+
+        @media print {
+            body {
+                background-color: #ffffff;
+            }
+            .select-container, .print-button, #unit-details, .p-4.text-sm.font-semibold, .rotated-text {
+                display: none;
+            }
+            .table-container {
+                padding: 0;
+                box-shadow: none;
+            }
+            .table-cell {
+                border-bottom: 1px solid #000;
+                padding: 0.5rem;
+                min-height: auto;
+                cursor: default;
+            }
+            .unit-title {
+                font-size: 1.1rem;
+            }
+            .unit-outcomes {
+                font-size: 0.7rem;
+            }
+            .unit-description {
+                font-size: 0.8rem;
+            }
+            #schedule-header {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-8">
+
+    <div class="text-center text-3xl sm:text-4xl font-extrabold text-[#002664] mt-8 mb-4">Science Life Skills Scope and Sequence</div>
+    <div class="select-container">
+        <div class="flex flex-nowrap justify-center space-x-1 sm:space-x-2">
+            <button class="select-button active" data-stage="7">Component A</button>
+            <button class="select-button" data-stage="8">Component B</button>
+            <button class="select-button" data-stage="9">Component C</button>
+            <button class="select-button" data-stage="10">Component D</button>
+            <button class="select-button" data-stage="11">Component E</button>
+            <button class="select-button" data-stage="12">Component F</button>
+            <button class="print-button hidden" id="print-button">Print PDF</button>
+        </div>
+    </div>
+
+    <div class="table-container bg-white rounded-xl shadow-lg overflow-hidden mt-8">
+        <div class="p-4 text-sm font-semibold text-gray-600">
+            *Click on the unit name to access available resources
+        </div>
+        <div id="schedule-header" class="grid grid-cols-11 text-center text-sm font-medium bg-[#002664] text-white border-b-2 border-white">
+            <!-- Header Row -->
+            <div class="col-span-1 border-r border-white"></div>
+            <div class="col-span-1 py-4">Week 1</div>
+            <div class="col-span-1 py-4">Week 2</div>
+            <div class="col-span-1 py-4">Week 3</div>
+            <div class="col-span-1 py-4">Week 4</div>
+            <div class="col-span-1 py-4">Week 5</div>
+            <div class="col-span-1 py-4">Week 6</div>
+            <div class="col-span-1 py-4">Week 7</div>
+            <div class="col-span-1 py-4">Week 8</div>
+            <div class="col-span-2 py-4 border-l border-white">Weeks 9 & 10</div>
+        </div>
+
+        <!-- Table Body Rows will be dynamically injected here -->
+        <div id="schedule-body" class="text-sm"></div>
+    </div>
+
+    <!-- New section that opens on click -->
+    
+    <!-- New standardized Unit Details panel -->
+    <div id="unit-details" class="table-container bg-white rounded-xl shadow-lg mt-8 p-8 transition-all duration-300 ease-in-out hidden">
+        <h2 id="unit-title" class="text-2xl font-bold text-[#146CFD] mb-2"></h2>
+        <p id="unit-subtitle" class="text-lg text-[#146CFD] mb-4"></p>
+        <p class="text-sm text-gray-500 mb-6">Lesson resources will be released by Term 1, 2026</p>
+
+        <!--  Section -->
+        <div class="border-t border-b border-gray-200 py-4">
+            <div id="outcomes-header" class="flex justify-between items-center cursor-pointer">
+                <h3 class="text-lg font-semibold text-[#146CFD]"></h3>
+                <svg id="outcomes-arrow" class="w-6 h-6 text-gray-500 transform transition-transform duration-300 rotate-90" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"></path>
+                </svg>
+            </div>
+            <div id="outcomes-content" class="mt-4 hidden"></div>
+        </div>
+
+        <!-- Resources Section -->
+        <div class="border-b border-gray-200 py-4 mt-4">
+            <div id="resources-header" class="flex justify-between items-center cursor-pointer">
+                <h3 class="text-lg font-semibold text-[#146CFD]">Resources</h3>
+                <svg id="resources-arrow" class="w-6 h-6 text-gray-500 transform transition-transform duration-300 rotate-90" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"></path>
+                </svg>
+            </div>
+            <div id="resources-content" class="mt-4 hidden">
+                <button id="add-resource" class="bg-[#146CFD] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#002664]">+ Add Resource</button>
+                <input type="file" id="resource-file" class="hidden" />
+                <ul id="resource-list" class="mt-4 space-y-2 text-sm text-gray-700"></ul>
+            </div>
+        </div>
+    </div>
+
+            <div id="outcomes-content" class="mt-4 hidden"></div>
+        </div>
+        
+        <!-- Lesson Resources Section -->
+        <div class="border-t border-b border-gray-200 py-4">
+            <div id="lesson-header" class="flex justify-between items-center cursor-pointer">
+                <h3 class="text-lg font-semibold text-[#146CFD]"></h3>
+                <svg id="lesson-arrow" class="w-6 h-6 text-gray-500 transform transition-transform duration-300 rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+            </div>
+            <div id="lesson-content" class="mt-4 hidden"></div>
+        </div>
+
+        <!-- Curriculum Resources Section -->
+        <div class="border-b border-gray-200 py-4">
+            <div id="curriculum-header" class="flex justify-between items-center cursor-pointer">
+                <h3 class="text-lg font-semibold text-[#146CFD]"></h3>
+                <svg id="curriculum-arrow" class="w-6 h-6 text-gray-500 transform transition-transform duration-300 rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+            </div>
+            <div id="curriculum-content" class="mt-4 hidden"></div>
+        </div>
+
+        <!-- Support Resources Section -->
+        <div class="border-b border-gray-200 py-4">
+            <div id="support-header" class="flex justify-between items-center cursor-pointer">
+                <h3 class="text-lg font-semibold text-[#146CFD]"></h3>
+                <svg id="support-arrow" class="w-6 h-6 text-gray-500 transform transition-transform duration-300 rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+            </div>
+            <div id="support-content" class="mt-4 hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        const scheduleBody = document.getElementById('schedule-body');
+        const unitDetails = document.getElementById('unit-details');
+        const unitTitle = document.getElementById('unit-title');
+        const unitSubtitle = document.getElementById('unit-subtitle');
+        const outcomesContent = document.getElementById('outcomes-content');
+        const lessonContent = document.getElementById('lesson-content');
+        const curriculumContent = document.getElementById('curriculum-content');
+        const supportContent = document.getElementById('support-content');
+        const stageButtons = document.querySelectorAll('.select-button');
+        const printButton = document.getElementById('print-button');
+
+        // Central data object for the Science Life Skills scope and sequence
+        const scopeAndSequenceData = {
+            '7': {
+                title: 'Component A Science Life Skills',
+                terms: [
+                    [{ name: 'Scientific Senses', weeks: 8 }],
+                    [{ name: 'Living and Non-Living', weeks: 8 }],
+                    [{ name: 'Simple Machines', weeks: 8 }],
+                    [{ name: 'Matter Around Us', weeks: 8 }]
+                ]
+            },
+            '8': {
+                title: 'Component B Science Life Skills',
+                terms: [
+                    [{ name: 'Asking Questions', weeks: 8 }],
+                    [{ name: 'Weather and Climate', weeks: 8 }],
+                    [{ name: 'Using Resources Wisely', weeks: 8 }],
+                    [{ name: 'Our Solar System', weeks: 8 }]
+                ]
+            },
+            '9': {
+                title: 'Component C Science Life Skills',
+                terms: [
+                    [{ name: 'Investigating Health', weeks: 8 }],
+                    [{ name: 'Our Food', weeks: 8 }],
+                    [{ name: 'Energy in Our Lives', weeks: 8 }],
+                    [{ name: 'Ecosystems', weeks: 8 }]
+                ]
+            },
+            '10': {
+                title: 'Component D Science Life Skills',
+                terms: [
+                    [{ name: 'Planning Investigations', weeks: 8 }],
+                    [{ name: 'Data and Evidence', weeks: 8 }],
+                    [{ name: 'Chemical Reactions', weeks: 8 }],
+                    [{ name: 'Genetic Traits', weeks: 8 }]
+                ]
+            },
+            '11': {
+                title: 'Component E Science Life Skills',
+                terms: [
+                    [{ name: 'Solving Scientific Problems', weeks: 8 }],
+                    [{ name: 'Understanding Our Universe', weeks: 8 }],
+                    [{ name: 'Forces and Motion', weeks: 8 }],
+                    [{ name: 'Healthy Habits for All', weeks: 8 }]
+                ]
+            },
+            '12': {
+                title: 'Component F Science Life Skills',
+                terms: [
+                    [{ name: 'Scientific Communication', weeks: 8 }],
+                    [{ name: 'Sustainable Living', weeks: 8 }],
+                    [{ name: 'Science in the Community', weeks: 8 }],
+                    [{ name: 'My Scientific World', weeks: 8 }]
+                ]
+            }
+        };
+
+        const unitDetailsData = {
+            'default': {
+                subtitle: 'Select a unit to view details',
+                outcomes: [],
+                description: '',
+                lesson: [],
+                curriculum: [],
+                support: []
+            },
+            // Year 7 Units
+            'Scientific Senses': {
+                subtitle: 'Component A | Term 1',
+                outcomes: ['SCLS-WS-01', 'SCLS-WS-03', 'SCLS-WS-04', 'SCLS-WS-05'],
+                description: 'Students will use their senses and simple tools to make observations and participate in simple, safe investigations.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Living and Non-Living': {
+                subtitle: 'Component A | Term 2',
+                outcomes: ['SCLS-FNS-01', 'SCLS-FNS-02'],
+                description: 'Students will identify the characteristics of living and non-living things in their environment and describe ways to help them survive.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Simple Machines': {
+                subtitle: 'Component A | Term 3',
+                outcomes: ['SCLS-FOR-01', 'SCLS-WAM-01'],
+                description: 'Students will recognize the forces and motion of objects in everyday contexts, such as pushing and pulling things.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Matter Around Us': {
+                subtitle: 'Component A | Term 4',
+                outcomes: ['SCLS-SOL-01', 'SCLS-CHG-01'],
+                description: 'Students will describe the properties of familiar substances and materials and observe simple chemical changes.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            // Year 8 Units
+            'Asking Questions': {
+                subtitle: 'Component B | Term 1',
+                outcomes: ['SCLS-WS-02', 'SCLS-WS-08', 'SCLS6-1'],
+                description: 'Students will ask questions and make predictions based on their observations and communicate their ideas.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Weather and Climate': {
+                subtitle: 'Component B | Term 2',
+                outcomes: ['SCLS-WS-06', 'SCLS-WS-08', 'SCLS6-4'],
+                description: 'Students will collect and interpret data about local weather patterns and communicate their findings.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Using Resources Wisely': {
+                subtitle: 'Component B | Term 3',
+                outcomes: ['SCLS-RES-01', 'SCLS-RES-02'],
+                description: 'Students will manage personal resources and contribute to sustainable practices in their community.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Our Solar System': {
+                subtitle: 'Component B | Term 4',
+                outcomes: ['SCLS-OTU-01', 'SCLS-WS-08'],
+                description: 'Students will make observations about the sun, moon, and stars, and communicate their understanding of the Universe.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            // Year 9 Units
+            'Investigating Health': {
+                subtitle: 'Component C | Term 1',
+                outcomes: ['SCLS-WS-03', 'SCLS-WS-04', 'SCLS-DIS-01', 'SCLS6-2'],
+                description: 'Students will plan and participate in investigations to collect data about healthy practices and disease prevention.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Our Food': {
+                subtitle: 'Component C | Term 2',
+                outcomes: ['SCLS-SOL-01', 'SCLS-CHG-01', 'SCLS-RXN-01'],
+                description: 'Students will explore the properties of familiar substances, including food, and learn about the chemical changes that occur when cooking.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Energy in Our Lives': {
+                subtitle: 'Component C | Term 3',
+                outcomes: ['SCLS-EGU-01', 'SCLS-WAM-01'],
+                description: 'Students will describe how energy is used in familiar contexts and explore how waves transfer energy.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Ecosystems': {
+                subtitle: 'Component C | Term 4',
+                outcomes: ['SCLS-FNS-02', 'SCLS-WS-07', 'SCLS-RES-02'],
+                description: 'Students will describe ways to sustain living things in an ecosystem and solve problems related to environmental changes.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            // Year 10 Units
+            'Planning Investigations': {
+                subtitle: 'Component D | Term 1',
+                outcomes: ['SCLS-WS-03', 'SCLS-WS-04', 'SCLS6-2', 'SCLS6-3'],
+                description: 'Students will plan and participate in investigations to obtain both primary and secondary data, focusing on safe practices.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Data and Evidence': {
+                subtitle: 'Component D | Term 2',
+                outcomes: ['SCLS-WS-06', 'SCLS-DAS-01', 'SCLS6-8', 'SCLS6-9'],
+                description: 'Students will use data and evidence from scientific investigations to draw conclusions and make informed decisions.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Chemical Reactions': {
+                subtitle: 'Component D | Term 3',
+                outcomes: ['SCLS-CHG-01', 'SCLS-RXN-01', 'SCLS6-10'],
+                description: 'Students will observe and describe a variety of chemical reactions and geological changes in the world around them.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Genetic Traits': {
+                subtitle: 'Component D | Term 4',
+                outcomes: ['SCLS-GEV-01', 'SCLS6-10'],
+                description: 'Students will identify their own personal genetic traits and explore how they are passed on.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            // Year 11 Units
+            'Solving Scientific Problems': {
+                subtitle: 'Component E | Term 1',
+                outcomes: ['SCLS-WS-07', 'SCLS-DAS-01', 'SCLS6-6', 'SCLS6-8'],
+                description: 'Students will identify scientific problems and develop strategies to solve them, using data and evidence.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Understanding Our Universe': {
+                subtitle: 'Component E | Term 2',
+                outcomes: ['SCLS-OTU-01', 'SCLS-WS-08', 'SCLS6-10'],
+                description: 'Students will explore models and descriptions of astronomical phenomena and communicate scientific information about the universe.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Forces and Motion': {
+                subtitle: 'Component E | Term 3',
+                outcomes: ['SCLS-FOR-01', 'SCLS-WAM-01', 'SCLS6-10'],
+                description: 'Students will describe the motion of objects and waves, and explore how forces affect them in different situations.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Healthy Habits for All': {
+                subtitle: 'Component E | Term 4',
+                outcomes: ['SCLS-DIS-01', 'SCLS-RES-01', 'SCLS6-7'],
+                description: 'Students will develop solutions for a range of health concepts and communicate scientific information about disease prevention.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            // Year 12 Units
+            'Scientific Communication': {
+                subtitle: 'Component F | Term 1',
+                outcomes: ['SCLS-WS-02', 'SCLS-WS-08', 'SCLS6-5', 'SCLS6-7'],
+                description: 'Students will develop and communicate questions and conclusions about a scientific investigation using scientific language and terminology.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Sustainable Living': {
+                subtitle: 'Component F | Term 2',
+                outcomes: ['SCLS-RES-01', 'SCLS-RES-02', 'SCLS-WS-07', 'SCLS6-6'],
+                description: 'Students will manage their personal resources and contribute to sustainable practices, developing solutions for environmental problems.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'Science in the Community': {
+                subtitle: 'Component F | Term 3',
+                outcomes: ['SCLS-DAS-01', 'SCLS-WS-08', 'SCLS6-8', 'SCLS6-9'],
+                description: 'Students will explore how scientific investigations and data are used in the community to solve problems and make decisions.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            },
+            'My Scientific World': {
+                subtitle: 'Component F | Term 4',
+                outcomes: ['SCLS-WS-02', 'SCLS-WS-08', 'SCLS6-1', 'SCLS6-5', 'SCLS6-7'],
+                description: 'Students will create a final project that synthesizes their scientific skills, from asking questions to communicating conclusions.',
+                lesson: [],
+                curriculum: ['Science Life Skills Syllabi'],
+                support: []
+            }
+        };
+
+        // Function to render the list of resources
+        function renderResources(container, resources) {
+            container.innerHTML = '';
+            if (!resources || resources.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500">No resources available for this unit.</p>';
+                return;
+            }
+            resources.forEach(resource => {
+                const item = document.createElement('div');
+                item.className = 'flex justify-between items-center py-2 text-[#D7153A] hover:text-[#002664] transition-colors duration-200';
+                item.innerHTML = `
+                    <span class="font-medium">${resource}</span>
+                    <div class="flex items-center space-x-2">
+                        <!-- Placeholder for download icon -->
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m-9 6h6a2 2 0 002-2v-6a2 2 0 00-2-2h-6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Toggling functionality for collapsible sections
+        const toggleSection = (headerId, contentId, arrowId) => {
+            const header = document.getElementById(headerId);
+            const content = document.getElementById(contentId);
+            const arrow = document.getElementById(arrowId);
+
+            header.addEventListener('click', () => {
+                content.classList.toggle('hidden');
+                arrow.classList.toggle('rotate-90');
+                arrow.classList.toggle('rotate-0');
+            });
+        };
+
+        // Function to render the main schedule table
+        function renderSchedule(stage) {
+            const data = scopeAndSequenceData[stage];
+            if (!data) return;
+
+            // Clear previous schedule
+            scheduleBody.innerHTML = '';
+
+            data.terms.forEach((term, termIndex) => {
+                const termRow = document.createElement('div');
+                termRow.className = 'grid grid-cols-11 text-sm';
+
+                // Add Term header
+                const termHeader = document.createElement('div');
+                termHeader.className = 'col-span-1 flex items-center justify-center p-4 font-medium bg-[#002664] text-white rotated-text border-r-2 border-b-2 border-white';
+                termHeader.textContent = `Term ${termIndex + 1}`;
+                termRow.appendChild(termHeader);
+
+                // Add units for the term
+                const unitsContainer = document.createElement('div');
+                unitsContainer.className = 'col-span-10 grid grid-cols-10';
+                let currentWeek = 1;
+
+                term.forEach(unit => {
+                    const unitCell = document.createElement('div');
+                    let colSpan = unit.weeks;
+                    const unitData = unitDetailsData[unit.name] || unitDetailsData['default'];
+                    const outcomesText = unitData.outcomes.length > 0 ? `Outcomes: ${unitData.outcomes.join(', ')}` : 'No outcomes listed.';
+
+                    unitCell.className = `col-span-${colSpan} py-4 px-3 bg-white text-gray-800 border-r border-b border-gray-200 table-cell flex-col`;
+                    unitCell.innerHTML = `
+                        <div class="unit-title font-medium text-lg mb-2">${unit.name}</div>
+                        <div class="unit-outcomes text-xs font-semibold text-[#D7153A] mb-1">${outcomesText}</div>
+                        <div class="unit-description text-sm">${unitData.description}</div>
+                    `;
+                    unitCell.addEventListener('click', () => showUnitDetails(unit.name));
+                    unitsContainer.appendChild(unitCell);
+                    currentWeek += unit.weeks;
+                });
+
+                // Add empty cells for any gaps before consolidation
+                const remainingWeeks = 8 - (currentWeek - 1);
+                if (remainingWeeks > 0) {
+                    const emptyCell = document.createElement('div');
+                    emptyCell.className = `col-span-${remainingWeeks} py-4 px-3 bg-[#CBDEFD] border-r border-b border-gray-200`;
+                    unitsContainer.appendChild(emptyCell);
+                }
+
+                // Add Consolidation block
+                const consolidationCell = document.createElement('div');
+                consolidationCell.className = `col-span-2 flex flex-col items-center justify-center bg-[#D7153A] text-white border-l border-b border-gray-200`;
+                consolidationCell.innerHTML = `
+                    <span class="font-medium">Consolidation</span>
+                    <span class="text-xs">
+                        <svg class="w-4 h-4 inline-block ml-1 transform rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+                    </span>
+                `;
+                unitsContainer.appendChild(consolidationCell);
+                termRow.appendChild(unitsContainer);
+                scheduleBody.appendChild(termRow);
+            });
+        }
+        
+        // Function to show unit details on click
+        function showUnitDetails(unitName) {
+            const data = unitDetailsData[unitName] || unitDetailsData['default'];
+            
+            unitTitle.textContent = unitName;
+            unitSubtitle.textContent = data.subtitle;
+            renderResources(outcomesContent, data.outcomes);
+            renderResources(lessonContent, data.lesson);
+            renderResources(curriculumContent, data.curriculum);
+            renderResources(supportContent, data.support);
+
+            unitDetails.classList.remove('hidden');
+            unitDetails.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Function to handle printing
+        function printSchedule() {
+            window.print();
+        }
+
+        // Event listeners for stage selection buttons
+        stageButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                stageButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                renderSchedule(button.dataset.stage);
+                printButton.classList.remove('hidden');
+            });
+        });
+
+        // Event listener for the new print button
+        printButton.addEventListener('click', printSchedule);
+
+        // Initialize the page with the default schedule (Year 7)
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSchedule('7');
+            printButton.classList.remove('hidden');
+            toggleSection('outcomes-header', 'outcomes-content', 'outcomes-arrow');
+            toggleSection('lesson-header', 'lesson-content', 'lesson-arrow');
+            toggleSection('curriculum-header', 'curriculum-content', 'curriculum-arrow');
+            toggleSection('support-header', 'support-content', 'support-arrow');
+        });
+    </script>
+
+<script>
+(function(){
+  if (window.__sepResourcesPatched__) return;
+  window.__sepResourcesPatched__ = true;
+
+  const storageKey = "resources-" + (document.title || location.pathname).replace(/\s+/g, "_");
+
+  function qs(id){ return document.getElementById(id); }
+
+  function addResourceToList(name, url){
+    const resourceList = qs("resource-list");
+    if(!resourceList) return;
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.textContent = name;
+    a.className = "text-[#146CFD] hover:underline";
+    li.appendChild(a);
+    resourceList.appendChild(li);
+  }
+
+  function saveResource(name, url){
+    const saved = JSON.parse(localStorage.getItem(storageKey) || "[]");
+    saved.push({name, url});
+    localStorage.setItem(storageKey, JSON.stringify(saved));
+  }
+
+  function loadResources(){
+    const saved = JSON.parse(localStorage.getItem(storageKey) || "[]");
+    saved.forEach(r => addResourceToList(r.name, r.url));
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    const outcomesHeader = document.getElementById("outcomes-header");
+    const outcomesContent = document.getElementById("outcomes-content");
+    const outcomesArrow = document.getElementById("outcomes-arrow");
+    if(outcomesHeader && outcomesContent && outcomesArrow){
+      outcomesHeader.addEventListener("click", ()=>{
+        outcomesContent.classList.toggle("hidden");
+        outcomesArrow.classList.toggle("rotate-90");
+      });
+    }
+
+    const resourcesHeader = document.getElementById("resources-header");
+    const resourcesContent = document.getElementById("resources-content");
+    const resourcesArrow = document.getElementById("resources-arrow");
+    if(resourcesHeader && resourcesContent && resourcesArrow){
+      resourcesHeader.addEventListener("click", ()=>{
+        resourcesContent.classList.toggle("hidden");
+        resourcesArrow.classList.toggle("rotate-90");
+      });
+    }
+
+    const addBtn = document.getElementById("add-resource");
+    const fileInput = document.getElementById("resource-file");
+    if(addBtn && fileInput){
+      addBtn.addEventListener("click", ()=> fileInput.click());
+      fileInput.addEventListener("change", ()=>{
+        const file = fileInput.files && fileInput.files[0];
+        if(!file) return;
+        const url = URL.createObjectURL(file);
+        addResourceToList(file.name, url);
+        saveResource(file.name, url);
+        fileInput.value = "";
+      });
+    }
+
+    loadResources();
+  });
+})();
+</script>
+</body>
+</html>

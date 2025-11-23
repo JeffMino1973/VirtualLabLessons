@@ -1,0 +1,626 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Science and Technology K-6 Scope and Sequence</title>
+    <!-- Inter font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS via CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
+        }
+        .table-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .table-cell {
+            padding: 1rem;
+            min-height: 80px;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            text-align: left;
+        }
+        .table-cell:hover {
+            background-color: #CBDEFD;
+            color: #000000;
+        }
+        .table-cell:hover .unit-title, .table-cell:hover .unit-description {
+            color: #000000;
+        }
+        .table-cell:hover .unit-outcomes {
+            color: #002664;
+        }
+        .rotated-text {
+            writing-mode: vertical-lr;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            white-space: nowrap;
+        }
+        /* Custom styles for the dropdown to match the overall aesthetic */
+        .select-container {
+            padding: 1rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .select-button, .print-button {
+            background-color: #146CFD;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 9999px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            margin: 0 8px;
+            border: none;
+        }
+        .select-button.active {
+            background-color: #002664;
+            box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+        }
+
+        @media print {
+            body {
+                background-color: #ffffff;
+            }
+            .select-container, .print-button, #unit-details, .p-4.text-sm.font-semibold, .rotated-text {
+                display: none;
+            }
+            .table-container {
+                padding: 0;
+                box-shadow: none;
+            }
+            .table-cell {
+                border-bottom: 1px solid #000;
+                padding: 0.5rem;
+                min-height: auto;
+                cursor: default;
+            }
+            .unit-title {
+                font-size: 1.1rem;
+            }
+            .unit-outcomes {
+                font-size: 0.7rem;
+            }
+            .unit-description {
+                font-size: 0.8rem;
+            }
+            #schedule-header {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* === SEP Brand Inject === */
+        :root{
+            --brand:#002664; /* darkest navy */
+            --brand-600:#001B4D; /* darker hover */
+            --accent:#D7153A; /* red */
+            --supp:#146CFD; /* supplementary blue */
+            --bg:#CBEDFD; /* light brand background */
+        }
+        *{box-sizing:border-box}
+        body{background:#f5f7fb;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+        .sep-header{display:flex;align-items:center;gap:.75rem;background:var(--brand);color:#fff;padding:.85rem 1.25rem;border-bottom:4px solid #0b1a3a;position:sticky;top:0;z-index:1000}
+        .sep-header img{height:40px;width:auto;border-radius:6px;background:#fff;padding:3px}
+        .sep-header .title{font-weight:700;letter-spacing:.2px;font-size:1.05rem}
+        .sep-container{max-width:1100px;margin:1.25rem auto;padding:1rem}
+        .sep-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 6px 18px rgba(2,22,58,.06)}
+        .sep-btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:.6rem 1rem;cursor:pointer;font-weight:600}
+        .sep-btn:hover{background:var(--brand-600)}
+        .sep-btn--danger{background:var(--accent)}
+        .sep-btn--danger:hover{filter:brightness(.95)}
+        /* print */
+        @media print {
+            .sep-header,.sep-nav,.sep-actions{display:none !important}
+            body{background:#fff !important}
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 sm:p-8">
+    <div class="sep-header">
+        <img src="../assets/SEP LOGO.jpg" alt="SEP Logo" onerror="this.style.display='none'">
+        <div class="title"></div>
+    </div>
+
+    <div class="text-center text-3xl sm:text-4xl font-extrabold text-[#002664] mt-8 mb-4">Science and Technology K-6 Scope and Sequence</div>
+    <div class="select-container">
+        <div class="flex flex-nowrap justify-center space-x-1 sm:space-x-2">
+            <button class="select-button active" data-stage="es1">Early Stage 1</button>
+            <button class="select-button" data-stage="s1">Stage 1</button>
+            <button class="select-button" data-stage="s2">Stage 2</button>
+            <button class="select-button" data-stage="s3">Stage 3</button>
+            <button class="print-button hidden" id="print-button">Print PDF</button>
+        </div>
+    </div>
+
+    <div class="table-container bg-white rounded-xl shadow-lg overflow-hidden mt-8">
+        <div class="p-4 text-sm font-semibold text-gray-600">
+            *Click on the unit name to access available resources
+        </div>
+        <div id="schedule-header" class="grid grid-cols-11 text-center text-sm font-medium bg-[#002664] text-white border-b-2 border-white">
+            <!-- Header Row -->
+            <div class="col-span-1 border-r border-white"></div>
+            <div class="col-span-1 py-4">Week 1</div>
+            <div class="col-span-1 py-4">Week 2</div>
+            <div class="col-span-1 py-4">Week 3</div>
+            <div class="col-span-1 py-4">Week 4</div>
+            <div class="col-span-1 py-4">Week 5</div>
+            <div class="col-span-1 py-4">Week 6</div>
+            <div class="col-span-1 py-4">Week 7</div>
+            <div class="col-span-1 py-4">Week 8</div>
+            <div class="col-span-2 py-4 border-l border-white">Weeks 9 & 10</div>
+        </div>
+
+        <!-- Table Body Rows will be dynamically injected here -->
+        <div id="schedule-body" class="text-sm"></div>
+    </div>
+
+    <!-- Unit Details panel -->
+    <div id="unit-details" class="table-container bg-white rounded-xl shadow-lg mt-8 p-8 transition-all duration-300 ease-in-out hidden">
+        <h2 id="unit-title" class="text-2xl font-bold text-[#146CFD] mb-2"></h2>
+        <p id="unit-subtitle" class="text-lg text-[#146CFD] mb-4"></p>
+        <p class="text-sm text-gray-500 mb-6">Lesson resources will be released by Term 1, 2026</p>
+
+        <!-- Outcomes Section -->
+        <div class="border-t border-b border-gray-200 py-4">
+            <div id="outcomes-header" class="flex justify-between items-center cursor-pointer">
+                <h3 class="text-lg font-semibold text-[#146CFD]">Outcomes</h3>
+                <svg id="outcomes-arrow" class="w-6 h-6 text-gray-500 transform transition-transform duration-300 rotate-90" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"></path>
+                </svg>
+            </div>
+            <div id="outcomes-content" class="mt-4 hidden"></div>
+        </div>
+
+        <!-- Resources Section -->
+        <div class="border-b border-gray-200 py-4 mt-4">
+            <div id="resources-header" class="flex justify-between items-center cursor-pointer">
+                <h3 class="text-lg font-semibold text-[#146CFD]">Resources</h3>
+                <svg id="resources-arrow" class="w-6 h-6 text-gray-500 transform transition-transform duration-300 rotate-90" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"></path>
+                </svg>
+            </div>
+            <div id="resources-content" class="mt-4 hidden">
+                <button id="add-resource" class="bg-[#146CFD] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#002664]">+ Add Resource</button>
+                <input type="file" id="resource-file" class="hidden" />
+                <ul id="resource-list" class="mt-4 space-y-2 text-sm text-gray-700"></ul>
+            </div>
+        </div>
+
+        <!-- Lesson Resources Section -->
+        <div class="border-t border-b border-gray-200 py-4">
+            <div id="lesson-header" style="display:none" class="flex justify-between items-center cursor-pointer">
+                <h3 class="text-lg font-semibold text-[#146CFD]">Lesson resources for download</h3>
+                <svg id="lesson-arrow" style="display:none" class="w-6 h-6 text-gray-500 transform transition-transform duration-300 rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+            </div>
+            <div id="lesson-content" style="display:none" class="mt-4 hidden"></div>
+        </div>
+
+        <!-- Curriculum Resources Section -->
+        <div class="border-b border-gray-200 py-4">
+            <div id="curriculum-header" style="display:none" class="flex justify-between items-center cursor-pointer">
+                <h3 class="text-lg font-semibold text-[#146CFD]">Curriculum resources for download</h3>
+                <svg id="curriculum-arrow" style="display:none" class="w-6 h-6 text-gray-500 transform transition-transform duration-300 rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+            </div>
+            <div id="curriculum-content" style="display:none" class="mt-4 hidden"></div>
+        </div>
+
+        <!-- Support Resources Section -->
+        <div class="border-b border-gray-200 py-4">
+            <div id="support-header" style="display:none" class="flex justify-between items-center cursor-pointer">
+                <h3 class="text-lg font-semibold text-[#146CFD]">Support resources</h3>
+                <svg id="support-arrow" style="display:none" class="w-6 h-6 text-gray-500 transform transition-transform duration-300 rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+            </div>
+            <div id="support-content" style="display:none" class="mt-4 hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        const scheduleBody = document.getElementById('schedule-body');
+        const unitDetails = document.getElementById('unit-details');
+        const unitTitle = document.getElementById('unit-title');
+        const unitSubtitle = document.getElementById('unit-subtitle');
+        const outcomesContent = document.getElementById('outcomes-content');
+        const lessonContent = document.getElementById('lesson-content');
+        const curriculumContent = document.getElementById('curriculum-content');
+        const supportContent = document.getElementById('support-content');
+        const stageButtons = document.querySelectorAll('.select-button');
+        const printButton = document.getElementById('print-button');
+
+        // Central data object for the Science and Technology scope and sequence
+        const scopeAndSequenceData = {
+            'es1': {
+                'title': 'Early Stage 1 Science and Technology',
+                'terms': [
+                    [{ name: 'Living things have characteristics that help them survive in their environment', weeks: 8 }],
+                    [{ name: 'Objects are made of materials that have observable properties', weeks: 8 }],
+                    [{ name: 'Understanding user needs inspires design and digital solutions', weeks: 8 }],
+                    [{ name: 'Living things and objects move in different ways', weeks: 8 }]
+                ]
+            },
+            's1': {
+                'title': 'Stage 1 Science and Technology',
+                'terms': [
+                    [{ name: 'Living things change over time', weeks: 8 }],
+                    [{ name: 'A design process is used to define user needs and create solutions', weeks: 8 }],
+                    [{ name: 'Planet Earth is our home', weeks: 8 }],
+                    [{ name: 'The human body’s sense organs detect its environment', weeks: 8 }],
+                    [{ name: 'Light and sound interact with materials in different ways', weeks: 8 }],
+                    [{ name: 'Light and sound interact with materials in different ways', weeks: 8 }],
+                    [{ name: 'The sky is our window to the Universe', weeks: 8 }],
+                    [{ name: 'Forces can change the way objects move', weeks: 8 }]
+                ]
+            },
+            's2': {
+                'title': 'Stage 2 Science and Technology',
+                'terms': [
+                    [{ name: 'Living things depend on energy and materials to survive', weeks: 8 }],
+                    [{ name: 'Design is a process of creating and innovating', weeks: 8 }],
+                    [{ name: 'Forces shape Earth’s surface', weeks: 8 }],
+                    [{ name: 'Body systems work together to enable movement', weeks: 8 }],
+                    [{ name: 'The Sun is the centre of our solar system and provides our world with energy', weeks: 8 }],
+                    [{ name: 'Design is a process of creating and innovating', weeks: 8 }],
+                    [{ name: 'Energy is required to change the properties of matter', weeks: 8 }],
+                    [{ name: 'Heat energy can be transferred', weeks: 8 }]
+                ]
+            },
+            's3': {
+                'title': 'Stage 3 Science and Technology',
+                'terms': [
+                    [{ name: 'Earth\'s climate is affected by natural and human activities', weeks: 8 }],
+                    [{ name: 'Body systems coordinate for survival', weeks: 8 }],
+                    [{ name: 'Electrical energy can be transferred and transformed', weeks: 8 }],
+                    [{ name: 'Electrical energy can be transferred and transformed', weeks: 8 }],
+                    [{ name: 'Living things may change over millions of years, in response to their environments', weeks: 8 }],
+                    [{ name: 'A fixed amount of usable matter makes up all the material on Earth', weeks: 8 }],
+                    [{ name: 'Our solar system is a part of one of billions of galaxies in the Universe', weeks: 8 }],
+                    [{ name: 'Design processes explore opportunities and develop solutions', weeks: 8 }]
+                ]
+            }
+        };
+
+        const unitDetailsData = {
+            'default': {
+                'subtitle': 'Select a unit to view details',
+                'outcomes': [],
+                'description': '',
+                'lesson': [],
+                'curriculum': [],
+                'support': []
+            },
+            // Early Stage 1 Units
+            'Living things have characteristics that help them survive in their environment': {
+                'subtitle': 'Early Stage 1 | Term 1',
+                'outcomes': ['STE-SCI-01', 'STE-PQU-01'],
+                'description': 'Identify the sense organs and describe their functions. Identify and use tools to aid and extend sensory observations. Describe how living things get air, water and energy to survive in their environment. Recognise that plants produce their own food, and animals need to find their food. Examine flowers, fruit, leaves, roots and stems of plants and describe their purpose. Examine animal bodies, their body coverings, and how and what they eat. Observe and group animals based on their characteristics and justify the grouping. Describe ways Aboriginal and/or Torres Strait Islander Peoples use Knowledges of the characteristics of plants and animals to survive. Pose questions to compare the characteristics of living things and non-living things.',
+                'lesson': [],
+                'curriculum': ['Science and Technology K-6 Syllabus'],
+                'support': []
+            },
+            'Objects are made of materials that have observable properties': {
+                'subtitle': 'Early Stage 1 | Term 2',
+                'outcomes': ['STE-SCI-01', 'STE-PQU-01', 'STE-DDT-01'],
+                'description': 'Recognise that properties of materials can be observed using the senses. Observe and manipulate materials to describe their properties using Tier 2 vocabulary. Pose questions about materials and describe how they are used in everyday objects. Bend, twist, crush and stretch objects to show that the properties of materials remain the same. Explore how Aboriginal and/or Torres Strait Islander Peoples use natural materials for specific purposes based on their properties. Writing: Select adjectives to add precision when describing the properties of materials. Design: Distinguish between user needs and wants and describe how they can lead to design opportunities. Identify designed products and how they meet user needs.',
+                'lesson': [],
+                'curriculum': ['Science and Technology K-6 Syllabus'],
+                'support': []
+            },
+            'Understanding user needs inspires design and digital solutions': {
+                'subtitle': 'Early Stage 1 | Term 3',
+                'description': 'Design and build a simple product that addresses a user need or opportunity. Pose questions to identify the parts of plants and animals used for food and fibre and create a data display. Examine designed structures that animals build to help them survive in their environment. Identify and safely use digital devices and apps for a purpose. Follow a series of steps to record, save and retrieve data.',
+                'outcomes': ['STE-DDT-01', 'STE-PQU-01'],
+                'lesson': [],
+                'curriculum': ['Science and Technology K-6 Syllabus'],
+                'support': []
+            },
+            'Living things and objects move in different ways': {
+                'subtitle': 'Early Stage 1 | Term 4',
+                'outcomes': ['STE-SCI-01', 'STE-PQU-01'],
+                'description': 'Observe, describe and categorise the ways in which living things move. Identify and label the parts of the human body that are used for movement. Test how the movement of an object is affected by its shape. Experiment to observe how an object’s movement is affected by its material. Identify objects made by Aboriginal and/or Torres Strait Islander Peoples and describe their movements. Writing: Use nouns, adjectives and verbs to label pictures to describe the characteristics or movement of living things. Use subject–verb–object structure to create simple sentences to describe how living things meet their needs.',
+                'lesson': [],
+                'curriculum': ['Science and Technology K-6 Syllabus'],
+                'support': []
+            },
+            // Stage 1 Units
+            'Living things change over time': {
+                'subtitle': 'Stage 1 | Term 1',
+                'outcomes': ['ST1-SCI-01', 'ST1-PQU-01', 'ST1-DAT-01'],
+                'description': 'Recognise that data can be collected through observation, testing and research, and that it can be represented as descriptions, diagrams, graphs, images and tables. Collect data about the variety of living things in a local habitat, group them and justify the groupings. Describe the changes in a plant as it grows using data and scientific models. Describe the changes in an animal as it goes through its life cycle using data and scientific models. Describe how Aboriginal and/or Torres Strait Islander Peoples use Knowledges of the life cycles of livings things. Examine the evidence for extinct animals. Writing: Use nouns, noun groups and verbs to create notes, annotations and labels to document observations.',
+                'lesson': [],
+                'curriculum': ['Science and Technology K-6 Syllabus'],
+                'support': []
+            },
+            'A design process is used to define user needs and create solutions': {
+                'subtitle': 'Stage 1 | Term 2',
+                'outcomes': ['ST1-DDT-01', 'ST1-PQU-01'],
+                'description': 'Recognise that a design process breaks large projects into manageable, logical steps. Pose questions and test how materials with different properties contribute to the effectiveness of a product. Apply one or more steps of a design process to make a product. Describe how food and fibre can be designed and produced to address user needs. Describe how products, including digital systems, can affect people’s lives. Digital: Identify digital systems that can be used to collect personal data and how to protect personal information.',
+                'lesson': [],
+                'curriculum': ['Science and Technology K-6 Syllabus'],
+                'support': []
+            },
+            // Add similar for other units...
+            // For brevity, omitting the full list, but in real would add all with similar pattern
+            'Planet Earth is our home': {
+                'subtitle': 'Stage 1 | Term 3',
+                'outcomes': ['ST1-SCI-01', 'ST1-PQU-01', 'ST1-DAT-01'],
+                'description': 'Observe and record daily weather to identify changes and patterns. Investigate how seasonal patterns influence the behaviour and appearance of living things. Describe the ways in which Aboriginal and/or Torres Strait Islander Peoples use seasonal indicators. Observe and identify rocks in natural formations and those used in built structures. Manipulate different rocks and describe their texture, colour and grain or crystal size. Writing: Use simple and compound sentences, flow charts and labelled diagrams to describe a process or function. Sequence simple and compound sentences, and use labelled diagrams and data to describe cause and effect.',
+                'lesson': [],
+                'curriculum': ['Science and Technology K-6 Syllabus'],
+                'support': []
+            },
+            // ... Add the rest similarly
+        };
+
+        // Function to render the list of resources
+        function renderResources(container, resources) {
+            container.innerHTML = '';
+            if (!resources || resources.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-500">No resources available for this unit.</p>';
+                return;
+            }
+            resources.forEach(resource => {
+                const item = document.createElement('div');
+                item.className = 'flex justify-between items-center py-2 text-[#D7153A] hover:text-[#002664] transition-colors duration-200';
+                item.innerHTML = `
+                    <span class="font-medium">${resource}</span>
+                    <div class="flex items-center space-x-2">
+                        <!-- Placeholder for download icon -->
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m-9 6h6a2 2 0 002-2v-6a2 2 0 00-2-2h-6a2 2 0 00-2 2v6a2 2 0 002 2z"></path></svg>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Toggling functionality for collapsible sections
+        const toggleSection = (headerId, contentId, arrowId) => {
+            const header = document.getElementById(headerId);
+            const content = document.getElementById(contentId);
+            const arrow = document.getElementById(arrowId);
+
+            header.addEventListener('click', () => {
+                content.classList.toggle('hidden');
+                arrow.classList.toggle('rotate-90');
+                arrow.classList.toggle('rotate-0');
+            });
+        };
+
+        // Function to render the main schedule table
+        function renderSchedule(stage) {
+            const data = scopeAndSequenceData[stage];
+            if (!data) return;
+
+            // Clear previous schedule
+            scheduleBody.innerHTML = '';
+
+            data.terms.forEach((term, termIndex) => {
+                const termRow = document.createElement('div');
+                termRow.className = 'grid grid-cols-11 text-sm';
+
+                // Add Term header
+                const termHeader = document.createElement('div');
+                termHeader.className = 'col-span-1 flex items-center justify-center p-4 font-medium bg-[#002664] text-white rotated-text border-r-2 border-b-2 border-white';
+                termHeader.textContent = `Term ${termIndex + 1}`;
+                termRow.appendChild(termHeader);
+
+                // Add units for the term
+                const unitsContainer = document.createElement('div');
+                unitsContainer.className = 'col-span-10 grid grid-cols-10';
+                let currentWeek = 1;
+
+                term.forEach(unit => {
+                    const unitCell = document.createElement('div');
+                    let colSpan = unit.weeks;
+                    const unitData = unitDetailsData[unit.name] || unitDetailsData['default'];
+                    const outcomesText = unitData.outcomes.length > 0 ? `Outcomes: ${unitData.outcomes.join(', ')}` : 'No outcomes listed.';
+
+                    unitCell.className = `col-span-${colSpan} py-4 px-3 bg-white text-gray-800 border-r border-b border-gray-200 table-cell flex-col`;
+                    unitCell.innerHTML = `
+                        <div class="unit-title font-medium text-lg mb-2 text-[#002664]">${unit.name}</div>
+                        <div class="unit-outcomes text-xs font-semibold text-[#D7153A] mb-1">${outcomesText}</div>
+                        <div class="unit-description text-sm">${unitData.description}</div>
+                    `;
+                    unitCell.addEventListener('click', () => showUnitDetails(unit.name));
+                    unitsContainer.appendChild(unitCell);
+                    currentWeek += unit.weeks;
+                });
+
+                // Add empty cells for any gaps before consolidation
+                const remainingWeeks = 8 - (currentWeek - 1);
+                if (remainingWeeks > 0) {
+                    const emptyCell = document.createElement('div');
+                    emptyCell.className = `col-span-${remainingWeeks} py-4 px-3 bg-[#CBDEFD] border-r border-b border-gray-200`;
+                    unitsContainer.appendChild(emptyCell);
+                }
+
+                // Add Consolidation block
+                const consolidationCell = document.createElement('div');
+                consolidationCell.className = `col-span-2 flex flex-col items-center justify-center bg-[#D7153A] text-white border-l border-b border-gray-200`;
+                consolidationCell.innerHTML = `
+                    <span class="font-medium">Consolidation</span>
+                    <span class="text-xs">
+                        <svg class="w-4 h-4 inline-block ml-1 transform rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+                    </span>
+                `;
+                unitsContainer.appendChild(consolidationCell);
+                termRow.appendChild(unitsContainer);
+                scheduleBody.appendChild(termRow);
+            });
+        }
+
+        // Function to show unit details on click
+        function showUnitDetails(unitName) {
+            const data = unitDetailsData[unitName] || unitDetailsData['default'];
+
+            unitTitle.textContent = unitName;
+            unitSubtitle.textContent = data.subtitle;
+            renderResources(outcomesContent, data.outcomes);
+            renderResources(lessonContent, data.lesson);
+            renderResources(curriculumContent, data.curriculum);
+            renderResources(supportContent, data.support);
+
+            unitDetails.classList.remove('hidden');
+            unitDetails.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Function to handle printing
+        function printSchedule() {
+            window.print();
+        }
+
+        // Event listeners for stage selection buttons
+        stageButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                stageButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                renderSchedule(button.dataset.stage);
+                printButton.classList.remove('hidden');
+            });
+        });
+
+        // Event listener for the new print button
+        printButton.addEventListener('click', printSchedule);
+
+        // Initialize the page with the default schedule (Early Stage 1)
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSchedule('es1');
+            printButton.classList.remove('hidden');
+            toggleSection('outcomes-header', 'outcomes-content', 'outcomes-arrow');
+            toggleSection('lesson-header', 'lesson-content', 'lesson-arrow');
+            toggleSection('curriculum-header', 'curriculum-content', 'curriculum-arrow');
+            toggleSection('support-header', 'support-content', 'support-arrow');
+        });
+    </script>
+
+    <script>
+        (function(){
+            if (window.__sepResourcesPatched__) return;
+            window.__sepResourcesPatched__ = true;
+
+            const storageKey = "resources-" + (document.title || location.pathname).replace(/\s+/g, "_");
+
+            function qs(id){ return document.getElementById(id); }
+
+            function addResourceToList(name, url){
+                const resourceList = qs("resource-list");
+                if(!resourceList) return;
+                const li = document.createElement("li");
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = name;
+                a.textContent = name;
+                a.className = "text-[#146CFD] hover:underline";
+                li.appendChild(a);
+                resourceList.appendChild(li);
+            }
+
+            function saveResource(name, url){
+                const saved = JSON.parse(localStorage.getItem(storageKey) || "[]");
+                saved.push({name, url});
+                localStorage.setItem(storageKey, JSON.stringify(saved));
+            }
+
+            function loadResources(){
+                const saved = JSON.parse(localStorage.getItem(storageKey) || "[]");
+                saved.forEach(r => addResourceToList(r.name, r.url));
+            }
+
+            document.addEventListener("DOMContentLoaded", function(){
+                const outcomesHeader = document.getElementById("outcomes-header");
+                const outcomesContent = document.getElementById("outcomes-content");
+                const outcomesArrow = document.getElementById("outcomes-arrow");
+                if(outcomesHeader && outcomesContent && outcomesArrow){
+                    outcomesHeader.addEventListener("click", ()=>{
+                        outcomesContent.classList.toggle("hidden");
+                        outcomesArrow.classList.toggle("rotate-90");
+                    });
+                }
+
+                const resourcesHeader = document.getElementById("resources-header");
+                const resourcesContent = document.getElementById("resources-content");
+                const resourcesArrow = document.getElementById("resources-arrow");
+                if(resourcesHeader && resourcesContent && resourcesArrow){
+                    resourcesHeader.addEventListener("click", ()=>{
+                        resourcesContent.classList.toggle("hidden");
+                        resourcesArrow.classList.toggle("rotate-90");
+                    });
+                }
+
+                const addBtn = document.getElementById("add-resource");
+                const fileInput = document.getElementById("resource-file");
+                if(addBtn && fileInput){
+                    addBtn.addEventListener("click", ()=> fileInput.click());
+                    fileInput.addEventListener("change", ()=>{
+                        const file = fileInput.files && fileInput.files[0];
+                        if(!file) return;
+                        const url = URL.createObjectURL(file);
+                        addResourceToList(file.name, url);
+                        saveResource(file.name, url);
+                        fileInput.value = "";
+                    });
+                }
+
+                loadResources();
+            });
+        })();
+    </script>
+</body>
+</html>
